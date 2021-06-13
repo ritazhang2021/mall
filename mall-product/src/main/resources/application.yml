@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://192.168.56.10:3306/mall_pms
+    driver-class-name: com.mysql.jdbc.Driver
+
+
+
+mybatis-plus:
+  #指定类路径下的mapper包下的所有.xml映射文件（映射dao中的类）
+  #classpath后加*包括引用的
+  mapper-locations: classpath:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: auto
+
+
+server:
+  port: 10000
