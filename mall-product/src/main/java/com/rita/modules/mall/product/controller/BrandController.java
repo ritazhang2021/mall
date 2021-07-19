@@ -1,10 +1,16 @@
 package com.rita.modules.mall.product.controller;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 
+import com.rita.common.valid.AddGroup;
+import com.rita.common.valid.UpdateGroup;
+import com.rita.common.valid.UpdateStatusGroup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +22,7 @@ import com.rita.modules.mall.product.service.BrandService;
 import com.rita.common.utils.PageUtils;
 import com.rita.common.utils.R;
 
+import javax.validation.Valid;
 
 
 /**
@@ -56,12 +63,37 @@ public class BrandController {
 
     /**
      * 保存
+     * validation 测试及返回结果
+     * {"name":""}
+     * {
+     *     "msg": "提交的数据不合法",
+     *     "code": 400,
+     *     "data": {
+     *         "name": "must not be empty"
+     *     }
+     * }
      */
     @RequestMapping("/save")
     //@RequiresPermissions("product:brand:save")
-    public R save(@RequestBody BrandEntity brand){
-		brandService.save(brand);
-
+    public R save(@RequestBody /*@Valid*/@Validated({AddGroup.class}) BrandEntity brand/*, BindingResult result*/){
+        //BindingResult必须紧跟着校验的对象
+//        if(result.hasErrors()){
+//            Map<String,String> map = new HashMap<>();
+//            //获取校验结果
+//            result.getFieldErrors().forEach(item ->{
+//                //获取校验提示
+//                String message = item.getDefaultMessage();
+//                //获取错误的属性的名字
+//                String field = item.getField();
+//                map.put(field, message);
+//            });
+//            return R.error(400, "提交的数据不合法").put("data",map);
+//
+//        }else {
+//            brandService.save(brand);
+//        }
+        //启用全局异常处理，程序会自动抛异常，全局的处理异常的controller会自动接收,如果没有全局的处理，错误就会出现在控制台或页面
+        brandService.save(brand);
         return R.ok();
     }
 
@@ -70,8 +102,19 @@ public class BrandController {
      */
     @RequestMapping("/update")
     //@RequiresPermissions("product:brand:update")
-    public R update(@RequestBody BrandEntity brand){
-		brandService.updateById(brand);
+    public R update(@RequestBody @Validated({UpdateGroup.class}) BrandEntity brand){
+		brandService.updateDetail(brand);
+
+        return R.ok();
+    }
+
+    /**
+     * 修改状态
+     */
+    @RequestMapping("/update/status")
+    //@RequiresPermissions("product:brand:update")
+    public R updateStatus(@RequestBody @Validated({UpdateStatusGroup.class}) BrandEntity brand){
+        brandService.updateById(brand);
 
         return R.ok();
     }

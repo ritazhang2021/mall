@@ -1,0 +1,21 @@
+#注意冒号后不能直接跟信息，要有一个空格
+#记得排队掉数据库相关依赖在common中
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    alicloud:
+      access-key: LTAI5tSBASRHAR6uHVu8hXzV
+      secret-key: CgHZpLW3bKoJSwcQRTQmH9cUITJIUL
+      oss:
+        endpoint: oss-us-west-1.aliyuncs.com
+        bucket: ritamall-hello
+        accessId:
+
+  application:
+    name: mall-third-party
+
+
+server:
+  port: 30000

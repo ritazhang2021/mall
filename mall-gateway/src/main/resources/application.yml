@@ -1,0 +1,61 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: baidu_route
+          uri: https://www.baidu.com
+          predicates:
+            - Query=url,baidu
+#       product如果放到renren-fast，renren-fast会先拦截到，把需求转到renren-fast,就会出现401错误,"invalid token"
+#       所以要把product-route调上来
+        - id: product_route
+          uri: lb://mall-product
+          predicates:
+            - Path=/api/product/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+#            从这个路径http://localhost:88/api/product/category/list/tree转发到http://localhost:10001/product/category/list/tree
+        - id: third_party_route
+#负载均衡到相关服务器，先在注册中心找,注意这里的服务器名和项目名不一样，但yml配置中的服务器名字是一样的
+          uri: lb://mall-third-party
+          predicates:
+            - Path=/api/thirdparty/**
+          filters:
+#/api/thirdparty路径前包括它和它的所有路径都去掉，只留下动态获取的
+            - RewritePath=/api/thirdparty/(?<segment>.*),/$\{segment}
+
+        - id: member_route
+          uri: lb://mall-member
+          predicates:
+            - Path=/api/member/**
+          filters:
+            #          api前缀去掉，剩下的都保留
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+        - id: ware_route
+          uri: lb://mall-ware
+          predicates:
+            - Path=/api/ware/**
+          filters:
+            #          api前缀去掉，剩下的都保留
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+
+#  先从注册中心找到renrenfast的地址
+#        只要发api下的任意请求，默认先路由到后台的管理系统，并且会给它重写，把真实的路径改为更改后的
+        - id: admin_route
+          uri: lb://renren-fast
+#          发过来的请求带api的转发给uri：renren-fast，先从注册中心找到renren-fast地址，renren-fast有自己的设置，转到相应的端口
+          predicates:
+            - Path=/api/**
+#          相应的端口进行改写路径处理
+#          以下的意思是，请求的路径中，(?<segment>.*)，改写成/renren-fast/再加之前的
+          filters:
+            - RewritePath=/api/(?<segment>/?.*),/renren-fast/$\{segment}
+#            注意各种版本号，filters的语法会不一样
+#            将它，http://localhost:88/api/captcha.jpg?
+#            改成，http://localhost:8080/renren-fast/captcha.jpg
+
+
+
+

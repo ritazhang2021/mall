@@ -24,6 +24,7 @@ import com.rita.common.utils.R;
  * @author Rita
  * @email rita2021.zhang@gmail.com
  * @date 2021-06-13 15:22:25
+ * •	仓库管理中有新增，可以直接新增，也可以从采购下单，再自动入库，卖出产品自动出库
  */
 @RestController
 @RequestMapping("ware/waresku")

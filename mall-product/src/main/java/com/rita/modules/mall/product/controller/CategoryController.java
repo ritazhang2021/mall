@@ -1,6 +1,7 @@
 package com.rita.modules.mall.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 
@@ -32,14 +33,13 @@ public class CategoryController {
     private CategoryService categoryService;
 
     /**
-     * 列表
+     * 查出所有分类以及子分类,以树型结构组装起来
      */
-    @RequestMapping("/list")
+    @RequestMapping("/list/tree")
     //@RequiresPermissions("product:category:list")
-    public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = categoryService.queryPage(params);
-
-        return R.ok().put("page", page);
+    public R list(){
+       List<CategoryEntity> entities = categoryService.listAsTree();
+        return R.ok().put("data", entities);
     }
 
 
@@ -51,7 +51,7 @@ public class CategoryController {
     public R info(@PathVariable("catId") Long catId){
 		CategoryEntity category = categoryService.getById(catId);
 
-        return R.ok().put("category", category);
+        return R.ok().put("data", category);
     }
 
     /**
@@ -64,25 +64,42 @@ public class CategoryController {
 
         return R.ok();
     }
+    /**
+     * 批量修改
+     * 为空的字段不会更新，发过来的对象有属性不想修改，就置成null
+     */
+    @RequestMapping("/update/sort")
+    public R updateSort(@RequestBody CategoryEntity[] category){
+        //前端传过来的是一个数组，每个数组中有一个json对象，用requestBody, spring mvc可以帮我们转换成CategoryEntity对象
+        //传进来的字段进行更新，没传进来的字段就不会更新
+        categoryService.updateBatchById(Arrays.asList(category));
+        return R.ok();
+    }
 
     /**
      * 修改
+     * 为空的字段不会更新，发过来的对象有属性不想修改，就置成null
      */
     @RequestMapping("/update")
     //@RequiresPermissions("product:category:update")
-    public R update(@RequestBody CategoryEntity category){
-		categoryService.updateById(category);
+    public R updateDetail(@RequestBody CategoryEntity category){
+		categoryService.updateCascade(category);
 
         return R.ok();
     }
 
     /**
      * 删除
+     * @RequestBody只有post请求有请求体
+     * Springmvc会将请求体（一般是json）转为对应的对象
      */
     @RequestMapping("/delete")
     //@RequiresPermissions("product:category:delete")
     public R delete(@RequestBody Long[] catIds){
-		categoryService.removeByIds(Arrays.asList(catIds));
+        //检察当前删除的菜单，是否被别的地方引用，如果被引用了，就不能删除
+		//categoryService.removeByIds(Arrays.asList(catIds));
+        //alt+enter创建这个方法
+		categoryService.removeMenuByIds(Arrays.asList(catIds));
 
         return R.ok();
     }

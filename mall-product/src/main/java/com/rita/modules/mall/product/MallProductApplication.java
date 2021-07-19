@@ -53,8 +53,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  *  1）、编写异常处理类，使用@ControllerAdvice。
  *  2）、使用@ExceptionHandler标注方法可以处理的异常。
  */
-//@EnableFeignClients(basePackages = "com.atguigu.gulimall.product.feign")
-//@EnableDiscoveryClient
+//如果主配置类和接口配置类的父类包一样，就算不指定扫描包，spring也会找到有@FeignClients的注解
+// 如果不是同一个父包，就必须指定扫描路径，就是只能扫描配置类以下的包
+@EnableFeignClients(basePackages = "com.rita.modules.mall.product.feign")
+@EnableDiscoveryClient
 @MapperScan("com.rita.modules.mall.product.dao")
 @SpringBootApplication
  class MallProductApplication {

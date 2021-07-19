@@ -11,5 +11,17 @@
         <result property="attrSort" column="attr_sort"/>
     </resultMap>
 
+    <!--    只有用到sql语句时才用编写xml方法，就是自带的CRUD不能满足需求-->
+    <delete id="deleteBatchRelation">
+        DELETE FROM pms_attr_attrgroup_relation WHERE
+        /*注意OR前后有空格*/
+        <foreach collection="entities" item="item" separator=" OR ">
+            /*每遍历出一个元素就要生成以下sql语句*/
+            (attr_id=#{item.attrId} AND attr_group_id=#{item.attrGroupId})
+
+    </foreach>
+
+    </delete>
+
 
 </mapper>

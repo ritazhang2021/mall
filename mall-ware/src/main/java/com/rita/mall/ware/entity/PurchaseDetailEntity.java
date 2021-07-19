@@ -34,6 +34,10 @@ public class PurchaseDetailEntity implements Serializable {
 	 */
 	private Long skuId;
 	/**
+	 * 采购商品名称
+	 */
+	private String skuName;
+	/**
 	 * 采购数量
 	 */
 	private Integer skuNum;

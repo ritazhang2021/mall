@@ -1,10 +1,15 @@
 package com.rita.modules.mall.product.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 /**
@@ -39,6 +44,8 @@ public class CategoryEntity implements Serializable {
 	/**
 	 * 是否显示[0-不显示，1显示]
 	 */
+//	如果和全局的定义不一样，可以自定义
+	@TableLogic(value = "1", delval = "0")
 	private Integer showStatus;
 	/**
 	 * 排序
@@ -56,5 +63,13 @@ public class CategoryEntity implements Serializable {
 	 * 商品数量
 	 */
 	private Integer productCount;
+
+	/**
+	 * 因为在数据库中没有这个字段，也不希望有，所以用这个注解
+	 *
+	 */
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)//当它是空的时候，不返回结果给前端
+	@TableField(exist = false)
+	private List<CategoryEntity>children;
 
 }

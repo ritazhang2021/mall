@@ -1,15 +1,16 @@
 package com.rita.mall.ware.controller;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 
+import com.rita.mall.ware.vo.MergeVo;
+import com.rita.mall.ware.vo.PurchaseDoneVo;
+import org.apache.http.HttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.rita.mall.ware.entity.PurchaseEntity;
 import com.rita.mall.ware.service.PurchaseService;
@@ -24,6 +25,7 @@ import com.rita.common.utils.R;
  * @author Rita
  * @email rita2021.zhang@gmail.com
  * @date 2021-06-13 15:22:25
+ * 采购需求，可以是人工创建，也可以是低于库存系统自动创建的
  */
 @RestController
 @RequestMapping("ware/purchase")
@@ -38,6 +40,17 @@ public class PurchaseController {
     //@RequiresPermissions("ware:purchase:list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = purchaseService.queryPage(params);
+
+        return R.ok().put("page", page);
+    }
+
+    /**
+     * 列表
+     */
+    @RequestMapping("/unreceive/list")
+    //@RequiresPermissions("ware:purchase:list")
+    public R UnreceivePurchaseList(@RequestParam Map<String, Object> params){
+        PageUtils page = purchaseService.queryPageUnreceivePurchase(params);
 
         return R.ok().put("page", page);
     }
@@ -60,6 +73,8 @@ public class PurchaseController {
     @RequestMapping("/save")
     //@RequiresPermissions("ware:purchase:save")
     public R save(@RequestBody PurchaseEntity purchase){
+        purchase.setCreateTime(new Date());
+        purchase.setCreateTime(new Date());
 		purchaseService.save(purchase);
 
         return R.ok();
@@ -71,7 +86,9 @@ public class PurchaseController {
     @RequestMapping("/update")
     //@RequiresPermissions("ware:purchase:update")
     public R update(@RequestBody PurchaseEntity purchase){
-		purchaseService.updateById(purchase);
+        purchaseService.updateById(purchase);
+
+
 
         return R.ok();
     }
@@ -84,6 +101,37 @@ public class PurchaseController {
     public R delete(@RequestBody Long[] ids){
 		purchaseService.removeByIds(Arrays.asList(ids));
 
+        return R.ok();
+    }
+    /**
+     * 合并采购单，可以和已创建未分配的合并，如果不指定，就新建一个采购单合并
+     *
+     * */
+    @PostMapping("/merge")
+    public R merge(@RequestBody MergeVo mergeVo){
+        purchaseService.mergerPurchase(mergeVo);
+        return R.ok();
+    }
+    /**
+     * 领取采购单
+     *
+     * */
+    @PostMapping("/received")
+    public R receivePurchase(@RequestBody List<Long> ids){
+        //System.out.println(httpRequest.getAllHeaders());
+        purchaseService.receivedPurchase(ids);
+        return R.ok();
+
+
+    }
+
+    /**
+     * 完成采购单
+     *
+     * */
+    @PostMapping("/done")
+    public R finish(@RequestBody PurchaseDoneVo purchaseDoneVo){
+        purchaseService.done(purchaseDoneVo);
         return R.ok();
     }
 

@@ -1,10 +1,24 @@
+#注意冒号后不能直接跟信息，要有一个空格
+
 spring:
   datasource:
     username: root
     password: root
     url: jdbc:mysql://192.168.56.10:3306/mall_pms
     driver-class-name: com.mysql.jdbc.Driver
-
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    alicloud:
+      access-key: LTAI5tSBASRHAR6uHVu8hXzV
+      secret-key: CgHZpLW3bKoJSwcQRTQmH9cUITJIUL
+      oss:
+        endpoint: oss-us-west-1.aliyuncs.com
+  application:
+    name: mall-product
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
 
 
 mybatis-plus:
@@ -14,7 +28,16 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
+#      配置全局逻辑删除
+      logic-delete-value: 1
+      logic-not-delete-value: 0
 
 
 server:
-  port: 10000
+  port: 10001
+
+#  调整输出日志
+logging:
+  level:
+#    注意com跟level要空两个格
+    com.rita.modules.mall.product.dao: debug

@@ -16,7 +16,6 @@ import java.util.Map;
 /**
  * 返回数据
  *
- * @author Mark sunlightcs@gmail.com
  */
 public class R extends HashMap<String, Object> {
 	private static final long serialVersionUID = 1L;
@@ -57,8 +56,18 @@ public class R extends HashMap<String, Object> {
 		return new R();
 	}
 
+	@Override
 	public R put(String key, Object value) {
 		super.put(key, value);
 		return this;
 	}
+
+	public Integer getCode() {
+		//因为R定义的是 public class R extends HashMap<String, Object>
+		//所以拿到的code 是 Object code = this.get("code");
+		//先将Object转为string，没有什么是不能转string的，再转integer
+		return (Integer)this.get("code");
+	}
+
+
 }

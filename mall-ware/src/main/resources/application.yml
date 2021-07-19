@@ -5,7 +5,14 @@ spring:
     url: jdbc:mysql://192.168.56.10:3306/mall_wms
     driver-class-name: com.mysql.jdbc.Driver
 
-
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+  application:
+    name: mall-ware
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
 
 mybatis-plus:
   #指定类路径下的mapper包下的所有.xml映射文件（映射dao中的类）
@@ -16,3 +23,7 @@ mybatis-plus:
       id-type: auto
 server:
   port: 11000
+#打印sql语句
+logging:
+  level:
+    com.rita: debug
