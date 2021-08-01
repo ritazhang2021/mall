@@ -32,7 +32,7 @@ public class IndexController {
 
     //路径有默认前缀和后缀
     @GetMapping({"/", "index.html"})
-    public String getIndex(Model model) {
+    public String  getIndex(Model model) {
         //获取所有的一级分类
         List<CategoryEntity> catagories = categoryService.getLevel1Catagories();
         model.addAttribute("catagories", catagories);
