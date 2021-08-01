@@ -1,13 +1,11 @@
 package com.rita.modules.mall.product.exception;
 
-import com.rita.common.exception.BizCodeEnume;
+import com.rita.common.exception.BizCodeEnum;
 import com.rita.common.utils.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
@@ -42,11 +40,11 @@ public class MallExceptionControllerAdvice {
         //返回值如果是处理页面，可以是ModelAndView,这里我们还是用全局处理R
         //return R.error();
         //因为R实际上是个map，用ResponseBody,前端接收map会直接转成json
-        return R.error(BizCodeEnume.VAILD_EXCEPTION.getCode(), BizCodeEnume.VAILD_EXCEPTION.getMsg() ).put("data",errorMap);
+        return R.error(BizCodeEnum.VAILD_EXCEPTION.getCode(), BizCodeEnum.VAILD_EXCEPTION.getMsg() ).put("data",errorMap);
     }
     @ExceptionHandler(value = Throwable.class)
     public R handleException(Throwable throwable){
         log.error("错误",throwable);
-        return R.error(BizCodeEnume.UNKNOW_EXCEPTION.getCode(),BizCodeEnume.UNKNOW_EXCEPTION.getMsg());
+        return R.error(BizCodeEnum.UNKNOW_EXCEPTION.getCode(), BizCodeEnum.UNKNOW_EXCEPTION.getMsg());
     }
 }

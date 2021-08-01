@@ -1,7 +1,6 @@
 package com.rita.modules.mall.product.vo;
 
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.rita.modules.mall.product.entity.AttrEntity;
 import lombok.Data;
 
 /**
@@ -14,6 +13,7 @@ public class AttrVo {
     //或者继承
     //或者autowaire
     //或者封装一个对象
+
 
     /**
      * 属性id copy from AttrEntity

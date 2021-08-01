@@ -16,4 +16,6 @@ import org.apache.ibatis.annotations.Param;
 public interface WareSkuDao extends BaseMapper<WareSkuEntity> {
     //多个参数，一定要用@Param，右键能自动生成
     void updateStock(@Param("skuId") Long skuId, @Param("wareId") Long wareId, @Param("skuNum") Integer skuNum);
+    //只有一个参数可以不用@Param,多个必须用
+    Long getSkuStock(Long skuId);
 }

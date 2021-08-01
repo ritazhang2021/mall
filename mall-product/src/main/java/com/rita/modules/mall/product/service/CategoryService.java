@@ -3,8 +3,8 @@ package com.rita.modules.mall.product.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rita.common.utils.PageUtils;
 import com.rita.modules.mall.product.entity.CategoryEntity;
+import com.rita.modules.mall.product.vo.Catelog2Vo;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +31,10 @@ public interface CategoryService extends IService<CategoryEntity> {
     Long[] findCateLogPath(Long catelogId);
 
     void updateCascade(CategoryEntity category);
+
+    List<CategoryEntity> getLevel1Catagories();
+
+    Map<String, List<Catelog2Vo>> getCatalogJsonDbWithSpringCache();
 
 }
 

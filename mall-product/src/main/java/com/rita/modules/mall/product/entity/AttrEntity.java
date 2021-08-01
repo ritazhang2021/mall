@@ -2,10 +2,9 @@ package com.rita.modules.mall.product.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
-import lombok.Data;
 
 /**
  * 商品属性
@@ -23,7 +22,7 @@ public class AttrEntity implements Serializable {
 	 * 属性id
 	 */
 	@TableId
-	private Long attrId;
+	private  Long attrId;
 	/**
 	 * 属性名
 	 */

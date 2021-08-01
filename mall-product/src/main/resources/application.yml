@@ -19,6 +19,10 @@ spring:
     name: mall-product
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
+  thymeleaf:
+    cache: false
+#    还可以配置前后缀，来配置为spring mvc的响应
+#    相当于我们的controller返回的不是json，而是字符串，就来前缀的路径找，后缀一般是html
 
 
 mybatis-plus:

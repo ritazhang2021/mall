@@ -1,7 +1,5 @@
 package com.rita.common.constant;
 
-import lombok.Getter;
-
 /**
  * @Author: Rita
  * @Date:7/6/2021 11:51 AM
@@ -17,6 +15,26 @@ public class ProductConstant {
         private int code;
         private String msg;
         AttrEnum(int code, String msg){
+            this.code = code;
+            this.msg = msg;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public String getMsg() {
+            return msg;
+        }
+    }
+    public enum StatusEnum{
+        New_SPU(0, "新建"),
+        New_UP(1, "商品上架"),
+        New_DOWN(2, "商品下架");
+
+        private int code;
+        private String msg;
+        StatusEnum(int code, String msg){
             this.code = code;
             this.msg = msg;
         }

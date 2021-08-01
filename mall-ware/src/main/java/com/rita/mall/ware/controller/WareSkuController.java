@@ -1,20 +1,16 @@
 package com.rita.mall.ware.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.rita.mall.ware.entity.WareSkuEntity;
-import com.rita.mall.ware.service.WareSkuService;
 import com.rita.common.utils.PageUtils;
 import com.rita.common.utils.R;
+import com.rita.mall.ware.entity.WareSkuEntity;
+import com.rita.mall.ware.service.WareSkuService;
+import com.rita.mall.ware.vo.SkuHasStockVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 
 
@@ -86,6 +82,19 @@ public class WareSkuController {
 		wareSkuService.removeByIds(Arrays.asList(ids));
 
         return R.ok();
+    }
+    //查询sku是否有库存
+    @PostMapping("/hasstock")
+    /*public R getSkuHasStocks(@RequestBody List<Long> skuIds) {
+        List<SkuHasStockVo> vos = wareSkuService.getSkuHasStocks(skuIds);
+        return R.ok().put("data", vos);
+    }*/
+    public  R getSkuHasStocks(@RequestBody List<Long> skuIds) {
+        List<SkuHasStockVo> vos = wareSkuService.getSkuHasStocks(skuIds);
+       /* R<List<SkuHasStockVo>> ok = R.ok();
+        ok.setData(vos);*/
+        System.out.println("***************"+R.ok().setData(vos));
+        return R.ok().setData(vos);
     }
 
 }

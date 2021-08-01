@@ -1,12 +1,11 @@
-package com.rita.modules.mall.product.controller;
+package com.rita.modules.mall.product.app;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-
+import com.rita.common.utils.PageUtils;
+import com.rita.common.utils.R;
 import com.rita.modules.mall.product.entity.AttrEntity;
+import com.rita.modules.mall.product.entity.AttrGroupEntity;
 import com.rita.modules.mall.product.service.AttrAttrgroupRelationService;
+import com.rita.modules.mall.product.service.AttrGroupService;
 import com.rita.modules.mall.product.service.AttrService;
 import com.rita.modules.mall.product.service.CategoryService;
 import com.rita.modules.mall.product.vo.AttrGroupRelationVo;
@@ -14,10 +13,9 @@ import com.rita.modules.mall.product.vo.AttrGroupWithAttrsVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.rita.modules.mall.product.entity.AttrGroupEntity;
-import com.rita.modules.mall.product.service.AttrGroupService;
-import com.rita.common.utils.PageUtils;
-import com.rita.common.utils.R;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 
 

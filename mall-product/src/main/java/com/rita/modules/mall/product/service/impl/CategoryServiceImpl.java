@@ -1,29 +1,24 @@
 package com.rita.modules.mall.product.service.impl;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.google.common.annotations.VisibleForTesting;
-import com.rita.modules.mall.product.service.CategoryBrandRelationService;
-import org.apache.commons.lang3.builder.ToStringExclude;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rita.common.utils.PageUtils;
 import com.rita.common.utils.Query;
-
 import com.rita.modules.mall.product.dao.CategoryDao;
 import com.rita.modules.mall.product.entity.CategoryEntity;
+import com.rita.modules.mall.product.service.CategoryBrandRelationService;
 import com.rita.modules.mall.product.service.CategoryService;
+import com.rita.modules.mall.product.vo.Catelog2Vo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service("categoryService")
@@ -90,6 +85,51 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         //更新级联表
         categoryBrandRelationService.updateCategory(category.getCatId(),category.getName());
 
+    }
+
+    @Override
+    public List<CategoryEntity> getLevel1Catagories() {
+        List<CategoryEntity> entities = baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq(("parent_cid"), 0));
+        return entities;
+    }
+
+    @Override
+    public Map<String, List<Catelog2Vo>> getCatalogJsonDbWithSpringCache() {
+        /*1. 查出所有1级分类*/
+        List<CategoryEntity> level1Catagories = getLevel1Catagories();
+        /*2. 封闭数据， */
+        Map<String, List<Catelog2Vo>> cate2Vos = null;
+
+        if(level1Catagories != null){
+            //原数据是map格式，
+            cate2Vos = level1Catagories.stream()
+                    .collect(Collectors.toMap(k -> k.getCatId().toString(), v -> {
+                        //1. 按一级分类，查出所有二级分类,并封装, 查找数据库中的parent_cid等于当前CategoryEntity的CatId
+                        List<CategoryEntity> level2Catagories = baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", v.getCatId()));
+                        //封装上面的结果
+                        List<Catelog2Vo> catelog2Vos = null;
+                        if (level2Catagories != null) {
+                            catelog2Vos = level2Catagories.stream().map(l2 -> {
+                                Catelog2Vo catelog2Vo = new Catelog2Vo(v.getCatId().toString(), l2.getCatId().toString(), l2.getName(),null);
+                                //找出二级分类的三级分类
+                                List<CategoryEntity> level3Catagories = baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", l2.getCatId()));
+                                if(level3Catagories != null){
+                                    //封装成Catelog2Vo
+                                    List<Catelog2Vo.Catalog3Vo> catalog3Vos = level3Catagories.stream().map(l3 -> {
+                                        Catelog2Vo.Catalog3Vo catalog3Vo = new Catelog2Vo.Catalog3Vo(l2.getCatId().toString(), l3.getCatId().toString(), l3.getName());
+                                        return catalog3Vo;
+                                    }).collect(Collectors.toList());
+                                    //三级分类的结果放到二级分类中
+                                    catelog2Vo.setCatalog3List(catalog3Vos);
+                                }
+                                return catelog2Vo;
+                            }).collect(Collectors.toList());
+                        }
+                        return catelog2Vos;
+
+                    }));
+        }
+        return cate2Vos;
     }
 
     public List<Long> findParentPath(Long catelogId, List<Long> paths) {

@@ -1,31 +1,33 @@
 package com.rita.modules.mall.product.service.impl;
 
+import com.alibaba.fastjson.TypeReference;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.rita.common.constant.ProductConstant;
 import com.rita.common.to.SkuReductionTo;
 import com.rita.common.to.SpuBoundTo;
+import com.rita.common.to.es.SkuEsModel;
+import com.rita.common.to.es.SkuHasStockVo;
+import com.rita.common.utils.PageUtils;
+import com.rita.common.utils.Query;
 import com.rita.common.utils.R;
+import com.rita.modules.mall.product.dao.SpuInfoDao;
 import com.rita.modules.mall.product.entity.*;
 import com.rita.modules.mall.product.feign.CouponFeignService;
+import com.rita.modules.mall.product.feign.SearchFeignService;
+import com.rita.modules.mall.product.feign.WareFeignService;
 import com.rita.modules.mall.product.service.*;
 import com.rita.modules.mall.product.vo.spu_save_vo.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.rita.common.utils.PageUtils;
-import com.rita.common.utils.Query;
-
-import com.rita.modules.mall.product.dao.SpuInfoDao;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 跨服务器需要,远程调用
@@ -55,6 +57,14 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     //远程调用
     @Autowired
     CouponFeignService couponFeignService;
+    @Autowired
+    BrandService brandService;
+    @Autowired
+    CategoryService categoryService;
+    @Autowired
+    WareFeignService wareFeignService;
+    @Autowired
+    SearchFeignService searchFeignService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -295,6 +305,113 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public void upSpuForSearch(Long spuId) {
+        //知道了上架模型，128课中，就是显示一个页面需要的所有信息，要将它放到ES中
+        //需要建一个TO来收集信息，因为从produect中组装好，还要发给search上架，所以就放到common中
+        //实际开发中，因为涉及到权限问题，所以需要在product中search中分别放两个to
+        //组装完后需要发送一个list
+        List<SkuEsModel> list = new ArrayList<>();
+
+        //1、查出当前spuId对应的所有sku信息,品牌的名字
+        List<SkuInfoEntity> skuInfoEntities=skuInfoService.getSkusBySpuId(spuId);
+        //TODO 4、查出当前sku的所有可以被用来检索的规格属性
+        //收集所有商品的所有属性的id
+        List<ProductAttrValueEntity> productAttrValueList = productAttrValueService.list(new QueryWrapper<ProductAttrValueEntity>().eq("spu_id", spuId));
+        List<Long> attrIds = productAttrValueList.stream().map(attr -> {
+            return attr.getAttrId();
+        }).collect(Collectors.toList());
+        //再去属性表中，拿到所有可以被检索的id
+        List<Long> searchIds=attrService.selectSearchAttrIds(attrIds);
+        //使用contains方法查询元素是否存在HashSet要比ArrayList快的多。主要原因是 List 底层是通过遍历的方式去作比较，而 Set 是算key的hash值的形式与集合内元素比较
+        Set<Long> ids = new HashSet<>(searchIds);
+        List<SkuEsModel.Attr> searchAttrs = productAttrValueList.stream().filter(entity -> {
+            return ids.contains(entity.getAttrId());
+        }).map(entity -> {
+            SkuEsModel.Attr attr = new SkuEsModel.Attr();
+            BeanUtils.copyProperties(entity, attr);
+            return attr;
+        }).collect(Collectors.toList());
+
+        //TODO 1、发送远程调用，库存系统查询是否有库存， 放在循环里会请求8次，所以放在这里，请求一次
+        //先在库存controller中填加远程调用
+        //sku的id，和它有没有库存，组成的 map
+        Map<Long, Boolean> stockMap = null;
+        //因为是远程调用，网络会不稳定
+        try {
+            List<Long> skuIdList = skuInfoEntities.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList());
+            //经过改造R的getdata方法，不用处理json换对象了
+            R r = wareFeignService.getSkuHasStocks(skuIdList);
+            //被保护类的写法
+            TypeReference<List<SkuHasStockVo>> typeReference = new TypeReference<List<SkuHasStockVo>>() { };
+            stockMap = r.getData(typeReference).stream().collect(Collectors.toMap(SkuHasStockVo::getSkuId, SkuHasStockVo::getHasStock));
+        }catch (Exception e){
+            log.error("远程调用库存服务失败,原因{}",e);
+        }
+
+        //2、封装每个sku的信息
+        //Map<Long, Boolean> finalStockMap = stockMap;
+        Map<Long, Boolean> finalStockMap = stockMap;
+        List<SkuEsModel> skuEsModels = skuInfoEntities.stream().map(sku -> {
+            //组装需要的数据
+            SkuEsModel skuEsModel = new SkuEsModel();
+            BeanUtils.copyProperties(sku, skuEsModel);
+            //对比不一样的数据，再手动填加
+            skuEsModel.setSkuPrice(sku.getPrice());
+            skuEsModel.setSkuImg(sku.getSkuDefaultImg());
+            //这里还应该考虑网络异常的处理
+            if(finalStockMap == null){
+                skuEsModel.setHasStock(true);
+            }else{
+                skuEsModel.setHasStock(finalStockMap.get(sku.getSkuId()));
+            }
+            //TODO 2、热度评分。0
+            skuEsModel.setHotScore(0L);
+            //TODO 3、查询品牌和分类的名字信息
+            BrandEntity brandEntity = brandService.getById(sku.getBrandId());
+            skuEsModel.setBrandName(brandEntity.getName());
+            skuEsModel.setBrandImg(brandEntity.getLogo());
+            CategoryEntity categoryEntity = categoryService.getById(sku.getCatalogId());
+            skuEsModel.setCatalogName(categoryEntity.getName());
+            //设置可搜索属性 在todo 4中拿到
+            skuEsModel.setAttrs(searchAttrs);
+            //设置是否有库存 在todo 1中
+            skuEsModel.setHasStock(finalStockMap==null?false:finalStockMap.get(sku.getSkuId()));
+            return skuEsModel;
+        }).collect(Collectors.toList());
+
+        //TODO 5、将数据发给es进行保存：mall-search
+        R r = searchFeignService.saveProductAsIndices(skuEsModels);
+        if (r.getCode()==0){
+            //远程调用成功，上架成功
+            //TODO 6、 修改当前spu状态
+            this.baseMapper.upSpuStatus(spuId, ProductConstant.StatusEnum.New_UP.getCode());
+
+        }else {
+            log.error("商品远程es保存失败");
+            //TODO 7、重复调用问题，接口幂等性，重试机制等
+            //feign的调用流程
+            /*
+            * 1. 构造请求数据，将对象转为json
+            * RequestTemplate
+            *2. 发送请洁度，进行执行
+            *excuteAndDEcode
+            * 3. 执行请求会有重试机制
+            * while(true){
+            *   try{
+            *       excuteAndDEcode
+            *   }catch
+                * {
+                *  try retryer.
+                *   catch throw ex;
+                *       continue
+                * }
+            * }
+            * */
+        }
+
     }
 
 

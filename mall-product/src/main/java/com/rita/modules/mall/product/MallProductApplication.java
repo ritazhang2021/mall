@@ -52,15 +52,25 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * @ControllerAdvice
  *  1）、编写异常处理类，使用@ControllerAdvice。
  *  2）、使用@ExceptionHandler标注方法可以处理的异常。
+ *
+ *  5、 引入模板引挚
+ *  1）、关闭缓存
+ *  2）、静态资源都放在static文件夹下，就可以按照路径直接访问了
+ *  3）、页面放在templates下
+ *  4）、页面修改不重起服务器实时更新
+ *  以上都可以配置，在WebMvcAutoConfiguration
+ *  1）、引入 spring提供的dev-tools
+ *  2）、重新编译页面ctrl+f9
+ *  但修改了类和配置，还是推荐大家重起服务
+ *
  */
 //如果主配置类和接口配置类的父类包一样，就算不指定扫描包，spring也会找到有@FeignClients的注解
 // 如果不是同一个父包，就必须指定扫描路径，就是只能扫描配置类以下的包
 @EnableFeignClients(basePackages = "com.rita.modules.mall.product.feign")
 @EnableDiscoveryClient
 @MapperScan("com.rita.modules.mall.product.dao")
-@SpringBootApplication
- class MallProductApplication {
-
+@SpringBootApplication()
+ public class MallProductApplication {
     public static void main(String[] args) {
         SpringApplication.run(MallProductApplication.class, args);
     }

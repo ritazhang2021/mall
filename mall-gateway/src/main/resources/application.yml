@@ -40,6 +40,12 @@ spring:
             #          api前缀去掉，剩下的都保留
             - RewritePath=/api/(?<segment>.*),/$\{segment}
 
+        - id: mall_host_route
+          uri: lb://mall-product
+          predicates:
+            - Host=**.mall.com, mall.com
+
+
 
 #  先从注册中心找到renrenfast的地址
 #        只要发api下的任意请求，默认先路由到后台的管理系统，并且会给它重写，把真实的路径改为更改后的
