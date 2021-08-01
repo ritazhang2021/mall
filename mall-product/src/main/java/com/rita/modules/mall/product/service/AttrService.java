@@ -3,7 +3,6 @@ package com.rita.modules.mall.product.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rita.common.utils.PageUtils;
 import com.rita.modules.mall.product.entity.AttrEntity;
-import com.rita.modules.mall.product.entity.ProductAttrValueEntity;
 import com.rita.modules.mall.product.vo.AttrGroupRelationVo;
 import com.rita.modules.mall.product.vo.AttrRespVo;
 import com.rita.modules.mall.product.vo.AttrVo;
@@ -36,6 +35,8 @@ public interface AttrService extends IService<AttrEntity> {
     List<AttrEntity> getRelationAttr(Long attrgroupId);
 
     PageUtils getNoRelationAttr(Long attrgroupId, Map<String, Object> params);
+
+    List<Long> selectSearchAttrIds(List<Long> attrIds);
 
 
 }

@@ -1,13 +1,21 @@
 package com.rita.modules.mall.product.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rita.common.constant.ProductConstant;
-import com.rita.common.utils.R;
+import com.rita.common.utils.PageUtils;
+import com.rita.common.utils.Query;
 import com.rita.modules.mall.product.dao.AttrAttrgroupRelationDao;
+import com.rita.modules.mall.product.dao.AttrDao;
 import com.rita.modules.mall.product.dao.AttrGroupDao;
 import com.rita.modules.mall.product.dao.CategoryDao;
-import com.rita.modules.mall.product.entity.*;
+import com.rita.modules.mall.product.entity.AttrAttrgroupRelationEntity;
+import com.rita.modules.mall.product.entity.AttrEntity;
+import com.rita.modules.mall.product.entity.AttrGroupEntity;
+import com.rita.modules.mall.product.entity.CategoryEntity;
+import com.rita.modules.mall.product.service.AttrService;
 import com.rita.modules.mall.product.service.CategoryService;
 import com.rita.modules.mall.product.vo.AttrGroupRelationVo;
 import com.rita.modules.mall.product.vo.AttrRespVo;
@@ -15,22 +23,11 @@ import com.rita.modules.mall.product.vo.AttrVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.rita.common.utils.PageUtils;
-import com.rita.common.utils.Query;
-
-import com.rita.modules.mall.product.dao.AttrDao;
-import com.rita.modules.mall.product.service.AttrService;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @Service("attrService")
@@ -300,7 +297,10 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         return pageUtils;
     }
 
-
+    @Override
+    public List<Long> selectSearchAttrIds(List<Long> attrIds) {
+        return baseMapper.selectSearchAttrIds(attrIds);
+    }
 
 
 }
