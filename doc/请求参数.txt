@@ -1,0 +1,40 @@
+@RequestParam接收的参数是来自HTTP请求url的QueryString中。可以是Post，也可以是get,因为在路径中，所以不需要写object接收
+可以直接用一个map或modelview 实例接收
+格式是age=1,在url中，用问号传参的格式，pathvariable则是直接写值，后端用占位符{}接收
+RequestParam可以接受简单类型的属性，也可以接受对象类型。
+
+@RequestParam有三个配置参数：
+
+required 表示是否必须，默认为 true，必须。
+defaultValue 可设置请求参数的默认值。
+value 为接收url的参数名（相当于key值）。
+@RequestParam用来处理 Content-Type 为 application/x-www-form-urlencoded 编码的内容，
+Content-Type默认为该属性。@RequestParam也可用于其它类型的请求，例如：POST、DELETE等请求。
+
+*****************************************************************************************************
+注解@RequestBody接收的参数是来自requestBody中，即请求体。
+一般用于处理非 Content-Type: application/x-www-form-urlencoded编码格式的数据，
+比如：application/json、application/xml等类型的数据。
+就application/json类型的数据而言，使用注解@RequestBody可以将body里面所有的json数据传到后端，后端再进行解析。
+
+GET请求中，因为没有HttpEntity，所以@RequestBody并不适用。
+POST请求中，通过HttpEntity传递的参数，必须要在请求头中声明数据的类型Content-Type，SpringMVC通过使用
+HandlerAdapter 配置的HttpMessageConverters来解析HttpEntity中的数据，然后绑定到相应的bean上
+
+POST请求时
+@RequestBody --> JSON字符串部分
+@RequestParam --> 请求参数部分
+
+******************************************************************************************************
+
+Spring中的注解 @RequestBody和@ResponseBody的使用和区别
+
+一、 @RequestBody
+@RequestBody的作用是将前端传来的json格式的数据转为自己定义好的javabean对象
+如图以微信小程序为例，前端向后端传入如下json格式的数据
+需要注意的是传入数据的属性名称要和后端javabean中定义的一致
+
+二、 @ResponseBody
+@ResponseBody的作用是将后端以return返回的javabean类型数据转为json类型数据。
+
+********************************************************************************************************
